@@ -1,0 +1,17 @@
+#to get base image
+FROM eclipse-temurin:17-jdk-jammy As maven_build 
+#set a working directory
+WORKDIR /sample
+#copy all files from source code repo   
+COPY . ./  
+#Build the application
+RUN mvn package "POM.xml" -c Release -o target  
+#get new image for running application
+FROM openjdk:17-jdk-jammy As base  
+#listening port 
+EXPOSE 8080   
+#copy build output to working directory
+COPY --from=maven_build /sample/target .  
+#set entrypoints to run application
+ENTRYPOINT ["java", "-war", "application.war"] 
+
